@@ -1,27 +1,26 @@
 const jwt = require("jsonwebtoken");
-// Ganti '../models/siswaModel' dengan path model User/Siswa kamu yang benar
-const User = require("../models/siswaModel");
+const User = require("../models/siswaModel"); // Pastikan path model ini benar
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. CARI USER DI DATABASE BERDASARKAN EMAIL
+    // 1. Cari user di database berdasarkan email
     const user = await User.findOne({ email });
 
-    // 2. CEK JIKA USER TIDAK ADA
+    // 2. Jika user tidak ditemukan
     if (!user) {
       return res.render("login", { error: "Email atau Password salah" });
     }
 
-    // 3. CEK VERIFIKASI PERUSAHAAN (Logika kamu yang tadi)
+    // 3. Cek verifikasi jika role-nya perusahaan
     if (user.role === "perusahaan" && user.isVerified === false) {
       return res.render("login", {
         error: "Akun perusahaan anda sedang menunggu verifikasi admin",
       });
     }
 
-    // 4. BUAT TOKEN (Sekarang variabel 'user' sudah ada isinya)
+    // 4. BUAT TOKEN (Sekarang variabel 'user' sudah aman karena di dalam fungsi)
     const token = jwt.sign(
       {
         id: user._id,
@@ -33,11 +32,11 @@ exports.login = async (req, res) => {
       { expiresIn: "1d" },
     );
 
-    // 5. SIMPAN KE COOKIE ATAU KIRIM RESPONSE
+    // 5. Simpan token di cookie dan pindah ke dashboard
     res.cookie("token", token, { httpOnly: true });
     res.redirect("/dashboard");
   } catch (error) {
-    console.error(error);
-    res.render("login", { error: "Terjadi kesalahan pada server" });
+    console.error("Error Login:", error);
+    res.status(500).render("login", { error: "Terjadi kesalahan pada server" });
   }
 };
