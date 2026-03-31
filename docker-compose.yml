@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
   database:
     image: mongo:latest
     container_name: stm-mongodb
@@ -9,18 +8,20 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db 
+      - mongo-data:/data/db
+
   app:
     build: .
     container_name: stm-job-portal
     restart: always
     ports:
-      - "80:3000"
+      - "6020:3000" # Mengarahkan port 6020 server ke port 3000 aplikasi
     environment:
       - NODE_ENV=production
-      - MONGO_URI=mongodb://database:27017/stm_job 
+      - MONGO_URI=mongodb://database:27017/stm_job
+      - JWT_SECRET=12345678 # Masukkan juga secret key di sini agar aman
     depends_on:
-      - database 
+      - database
 
 volumes:
   mongo-data:
